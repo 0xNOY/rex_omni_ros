@@ -17,7 +17,7 @@ if ! rosnode list >/dev/null 2>&1; then
 fi
 
 set +e
-pytest rex_omni_ros_python/test/integration -v "$@"
+pytest rex_omni_ros/test/integration -v "$@"
 status=$?
 set -e
 

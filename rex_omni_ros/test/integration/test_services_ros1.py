@@ -28,7 +28,7 @@ def services():
         # start_new_session + killpg: kill the whole group in case rosrun
         # leaves the node as a separate child process.
         process = subprocess.Popen(
-            ["rosrun", "rex_omni_ros_python", "rex_omni_server", "_backend:=mock"],
+            ["rosrun", "rex_omni_ros", "rex_omni_server", "_backend:=mock"],
             stdout=log,
             stderr=subprocess.STDOUT,
             start_new_session=True,

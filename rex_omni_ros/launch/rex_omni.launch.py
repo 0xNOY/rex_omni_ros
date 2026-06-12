@@ -9,14 +9,14 @@ from launch_ros.actions import Node
 
 def generate_launch_description() -> LaunchDescription:
     params = os.path.join(
-        get_package_share_directory("rex_omni_ros_python"),
+        get_package_share_directory("rex_omni_ros"),
         "config",
         "rex_omni_ros2.yaml",
     )
     return LaunchDescription(
         [
             Node(
-                package="rex_omni_ros_python",
+                package="rex_omni_ros",
                 executable="rex_omni_server",
                 name="rex_omni",
                 output="screen",

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rex_omni_ros_python</name>
+  <name>rex_omni_ros</name>
   <version>0.1.0</version>
   <description>ROS service node providing Rex-Omni visual perception via in-process vLLM inference.</description>
   <maintainer email="noy@abc-net.jp">0xNOY</maintainer>

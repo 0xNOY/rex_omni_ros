@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(rex_omni_ros_python)
+project(rex_omni_ros)
 
 if("$ENV{ROS_VERSION}" STREQUAL "1")
   find_package(catkin REQUIRED)

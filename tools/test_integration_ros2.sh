@@ -3,4 +3,4 @@
 set -eo pipefail  # no -u: colcon setup scripts reference unset variables
 cd "$(dirname "$0")/.."
 source install/ros2/setup.bash
-exec pytest rex_omni_ros_python/test/integration -v "$@"
+exec pytest rex_omni_ros/test/integration -v "$@"

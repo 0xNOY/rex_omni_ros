@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="rex_omni_ros" type="rex_omni_server" name="rex_omni" output="screen">
+    <rosparam command="load" file="$(find rex_omni_ros)/config/rex_omni_ros1.yaml" />
+  </node>
+</launch>

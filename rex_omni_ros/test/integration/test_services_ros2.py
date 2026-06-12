@@ -32,7 +32,7 @@ def client_node():
             [
                 "ros2",
                 "run",
-                "rex_omni_ros_python",
+                "rex_omni_ros",
                 "rex_omni_server",
                 "--ros-args",
                 "-p",
