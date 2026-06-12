@@ -1,0 +1,93 @@
+"""Rex-Omni service node, common to ROS1 and ROS2."""
+
+from __future__ import annotations
+
+import functools
+
+from rex_omni_msgs.srv import (
+    Detect,
+    DetectKeypoints,
+    DetectWithVisualPrompt,
+    Point,
+    RecognizeText,
+)
+
+from rex_omni_ros.compat import RosNode
+from rex_omni_ros.core.engine import Engine, EngineConfig, RexOmniEngine
+from rex_omni_ros.core.mock import MockEngine
+from rex_omni_ros.handlers import RexOmniHandlers
+
+
+def _load_config(node: RosNode) -> EngineConfig:
+    defaults = EngineConfig()
+    return EngineConfig(
+        model_path=str(node.get_param("model_path", defaults.model_path)),
+        gpu_memory_utilization=float(
+            node.get_param("gpu_memory_utilization", defaults.gpu_memory_utilization)
+        ),
+        max_model_len=int(node.get_param("max_model_len", defaults.max_model_len)),
+        min_pixels=int(node.get_param("min_pixels", defaults.min_pixels)),
+        max_pixels=int(node.get_param("max_pixels", defaults.max_pixels)),
+        max_tokens=int(node.get_param("max_tokens", defaults.max_tokens)),
+        temperature=float(node.get_param("temperature", defaults.temperature)),
+        top_p=float(node.get_param("top_p", defaults.top_p)),
+        top_k=int(node.get_param("top_k", defaults.top_k)),
+        repetition_penalty=float(
+            node.get_param("repetition_penalty", defaults.repetition_penalty)
+        ),
+        system_prompt=str(node.get_param("system_prompt", defaults.system_prompt)),
+        enable_confidence=bool(
+            node.get_param("enable_confidence", defaults.enable_confidence)
+        ),
+        quantization=str(node.get_param("quantization", defaults.quantization)),
+        dtype=str(node.get_param("dtype", defaults.dtype)),
+        enforce_eager=bool(node.get_param("enforce_eager", defaults.enforce_eager)),
+    )
+
+
+def _create_engine(node: RosNode, config: EngineConfig) -> Engine:
+    backend = str(node.get_param("backend", "vllm"))
+    if backend == "mock":
+        node.log_warn("using mock engine; responses are canned test data")
+        return MockEngine()
+    if backend != "vllm":
+        raise ValueError(f"unknown backend {backend!r}; expected 'vllm' or 'mock'")
+    return RexOmniEngine(config)
+
+
+def main() -> None:
+    node = RosNode("rex_omni")
+    config = _load_config(node)
+    engine = _create_engine(node, config)
+
+    node.log_info(f"loading model {config.model_path} (this may take a while)...")
+    engine.start()
+
+    handlers = RexOmniHandlers(engine, log_error=node.log_error)
+    services = [
+        (Detect, "detect", handlers.handle_detect),
+        (Point, "point", handlers.handle_point),
+        (
+            DetectWithVisualPrompt,
+            "detect_with_visual_prompt",
+            handlers.handle_detect_with_visual_prompt,
+        ),
+        (DetectKeypoints, "detect_keypoints", handlers.handle_detect_keypoints),
+        (RecognizeText, "recognize_text", handlers.handle_recognize_text),
+    ]
+    for srv_type, name, handler in services:
+        node.create_service(
+            srv_type,
+            name,
+            functools.partial(handler, response_cls=RosNode.response_class(srv_type)),
+        )
+
+    node.log_info(
+        "rex_omni ready; services: "
+        + ", ".join(name for _, name, _ in services)
+    )
+    node.spin()
+
+
+if __name__ == "__main__":
+    main()

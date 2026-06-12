@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+from rex_omni_ros.node import main
+
+main()

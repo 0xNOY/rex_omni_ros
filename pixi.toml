@@ -1,0 +1,77 @@
+[workspace]
+authors = ["0xNOY <noy@abc-net.jp>"]
+channels = ["conda-forge"]
+name = "rex_omni_ros"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[system-requirements]
+cuda = "12.6"
+
+# vLLM is installed from PyPI (not conda-forge) so that its CUDA runtime is
+# self-contained in nvidia-* wheels and cannot clash with RoboStack's native
+# library pins (libprotobuf etc.).
+[dependencies]
+python = "3.12.*"
+numpy = ">=2,<2.4"  # >=2: vllm 0.22 (opencv-headless); <2.4: mistral-common
+setuptools = ">=77.0.3,<80"  # vllm 0.9.x requires setuptools <80
+pillow = "*"
+compilers = "*"
+cmake = "<4"  # CMake 4 breaks Humble's rosidl FindPython usage
+make = "*"
+ninja = "*"
+pkg-config = "*"
+colcon-common-extensions = "*"
+pytest = "*"
+ruff = "*"
+mypy = "*"
+
+[pypi-dependencies]
+vllm = ">=0.22,<0.23"
+
+[tasks]
+lint = "ruff check rex_omni_ros_python"
+fmt = "ruff format rex_omni_ros_python"
+typecheck = "mypy rex_omni_ros_python/src/rex_omni_ros/core"
+test-core = "pytest rex_omni_ros_python/test/unit -v"
+test-gpu = "pytest rex_omni_ros_python/test/gpu -v -m gpu"
+
+[environments]
+ros1 = ["ros1"]
+ros2 = ["ros2"]
+
+[feature.ros1]
+channels = ["https://prefix.dev/robostack-noetic", "conda-forge"]
+
+[feature.ros1.dependencies]
+ros-noetic-ros-core = "*"  # roscore / rosrun / roslaunch
+ros-noetic-catkin = "*"
+ros-noetic-rospy = "*"
+ros-noetic-message-generation = "*"
+ros-noetic-message-runtime = "*"
+ros-noetic-std-msgs = "*"
+ros-noetic-sensor-msgs = "*"
+
+# -DPYTHON_EXECUTABLE / -DPython*_EXECUTABLE pin CMake to the environment's
+# Python; otherwise FindPython picks up a newer system interpreter from PATH.
+[feature.ros1.tasks]
+build = "colcon build --base-paths rex_omni_msgs rex_omni_ros_python --build-base build/ros1 --install-base install/ros1 --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$CONDA_PREFIX/bin/python -DPython_EXECUTABLE=$CONDA_PREFIX/bin/python -DPython3_EXECUTABLE=$CONDA_PREFIX/bin/python"
+clean = "rm -rf build/ros1 install/ros1 log"
+test-integration = { cmd = "bash tools/test_integration_ros1.sh", depends-on = ["build"] }
+
+[feature.ros2]
+channels = ["https://prefix.dev/robostack-humble", "conda-forge"]
+
+[feature.ros2.dependencies]
+ros-humble-ros-core = "*"  # ros2 CLI / launch
+ros-humble-rclpy = "*"
+ros-humble-rosidl-default-generators = "*"
+ros-humble-rosidl-default-runtime = "*"
+ros-humble-std-msgs = "*"
+ros-humble-sensor-msgs = "*"
+ros-humble-ament-cmake = "*"
+
+[feature.ros2.tasks]
+build = "colcon build --base-paths rex_omni_msgs rex_omni_ros_python --build-base build/ros2 --install-base install/ros2 --merge-install --cmake-args -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$CONDA_PREFIX/bin/python -DPython_EXECUTABLE=$CONDA_PREFIX/bin/python -DPython3_EXECUTABLE=$CONDA_PREFIX/bin/python"
+clean = "rm -rf build/ros2 install/ros2 log"
+test-integration = { cmd = "bash tools/test_integration_ros2.sh", depends-on = ["build"] }

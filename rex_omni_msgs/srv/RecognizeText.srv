@@ -1,0 +1,12 @@
+# OCR: text detection and recognition.
+uint8 VARIANT_WORD_BOX=0
+uint8 VARIANT_TEXTLINE_BOX=1
+uint8 VARIANT_POLYGON=2
+
+sensor_msgs/Image image
+uint8 variant
+---
+bool success
+string message
+float32 inference_time
+TextRegion[] regions

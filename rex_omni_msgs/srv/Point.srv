@@ -1,0 +1,12 @@
+# Object pointing or GUI pointing.
+uint8 VARIANT_POINTING=0
+uint8 VARIANT_GUI_POINTING=1
+
+sensor_msgs/Image image
+string[] categories  # category names, GUI element descriptions, etc.
+uint8 variant
+---
+bool success
+string message
+float32 inference_time
+PointDetection[] points

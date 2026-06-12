@@ -1,0 +1,12 @@
+# Object detection, referring expression grounding, or GUI grounding.
+uint8 VARIANT_DETECTION=0
+uint8 VARIANT_GUI_GROUNDING=1
+
+sensor_msgs/Image image
+string[] categories  # category names or referring expressions
+uint8 variant
+---
+bool success
+string message          # error description when success is false
+float32 inference_time  # seconds spent in model inference
+Detection[] detections

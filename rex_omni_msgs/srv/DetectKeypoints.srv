@@ -1,0 +1,9 @@
+# Keypoint (skeleton) detection.
+sensor_msgs/Image image
+string category       # object category to detect, e.g. "person", "cat"
+string keypoint_type  # keypoint set: "person" or "animal"
+---
+bool success
+string message
+float32 inference_time
+KeypointInstance[] instances

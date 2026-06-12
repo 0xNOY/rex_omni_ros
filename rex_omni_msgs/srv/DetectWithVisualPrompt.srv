@@ -1,0 +1,8 @@
+# Visual prompting: find all objects similar to the reference boxes.
+sensor_msgs/Image image
+BoundingBox[] reference_boxes  # pixel coordinates in the request image
+---
+bool success
+string message
+float32 inference_time
+Detection[] detections

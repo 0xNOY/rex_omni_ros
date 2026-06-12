@@ -1,0 +1,17 @@
+tmp/
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# colcon build artifacts
+build/
+install/
+log/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
