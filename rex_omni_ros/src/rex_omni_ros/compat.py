@@ -17,9 +17,10 @@ Unified semantics:
 from __future__ import annotations
 
 import os
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, TypeVar, Union, cast
 
 ParamValue = Union[bool, int, float, str, List[str]]
+ParamT = TypeVar("ParamT", bound=ParamValue)
 ServiceHandler = Callable[[Any], Any]
 
 ROS_VERSION = int(os.environ.get("ROS_VERSION", "0"))
@@ -43,8 +44,8 @@ if ROS_VERSION == 1:
         def response_class(srv_type: Any) -> Any:
             return srv_type._response_class
 
-        def get_param(self, name: str, default: ParamValue) -> ParamValue:
-            return rospy.get_param("~" + name, default)
+        def get_param(self, name: str, default: ParamT) -> ParamT:
+            return cast(ParamT, rospy.get_param("~" + name, default))
 
         def create_service(
             self, srv_type: Any, name: str, handler: ServiceHandler
@@ -89,8 +90,8 @@ elif ROS_VERSION == 2:
         def response_class(srv_type: Any) -> Any:
             return srv_type.Response
 
-        def get_param(self, name: str, default: ParamValue) -> ParamValue:
-            return self._node.declare_parameter(name, default).value
+        def get_param(self, name: str, default: ParamT) -> ParamT:
+            return cast(ParamT, self._node.declare_parameter(name, default).value)
 
         def create_service(
             self, srv_type: Any, name: str, handler: ServiceHandler

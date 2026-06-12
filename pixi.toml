@@ -35,7 +35,7 @@ transformers = ">=4.56,<5"
 [tasks]
 lint = "ruff check rex_omni_ros"
 fmt = "ruff format rex_omni_ros"
-typecheck = "mypy rex_omni_ros/src/rex_omni_ros/core"
+typecheck = "mypy rex_omni_ros/src/rex_omni_ros"
 test-core = "pytest rex_omni_ros/test/unit -v"
 test-gpu = "pytest rex_omni_ros/test/gpu -v -m gpu"
 
