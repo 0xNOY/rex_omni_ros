@@ -51,6 +51,7 @@ class RexOmniHandlers:
         visual_prompt_boxes: list[types.Box] | None = None,
     ) -> InferenceResult | None:
         """Run inference, filling error fields on failure."""
+        response.header = request_image.header
         try:
             image = conversions.image_msg_to_pil(request_image)
             with self._lock:

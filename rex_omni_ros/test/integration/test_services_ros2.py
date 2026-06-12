@@ -12,7 +12,7 @@ import subprocess
 
 import pytest
 
-from .util import make_bad_image_msg, make_image_msg
+from .util import FRAME_ID, make_bad_image_msg, make_image_msg
 
 pytestmark = pytest.mark.skipif(
     os.environ.get("ROS_VERSION") != "2", reason="requires a ROS2 environment"
@@ -77,6 +77,7 @@ def test_detect(client_node):
     )
     response = call(client_node, Detect, "/rex_omni/detect", request)
     assert response.success, response.message
+    assert response.header.frame_id == FRAME_ID
     assert [d.category for d in response.detections] == ["person", "dog"]
     detection = response.detections[0]
     assert 0 < detection.bbox.x0 < detection.bbox.x1 <= 640

@@ -6,6 +6,7 @@ sensor_msgs/Image image
 string[] categories  # category names, GUI element descriptions, etc.
 uint8 variant
 ---
+std_msgs/Header header  # copied from the request image (stamp, frame_id)
 bool success
 string message
 float32 inference_time

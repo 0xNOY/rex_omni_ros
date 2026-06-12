@@ -3,6 +3,7 @@ sensor_msgs/Image image
 string category       # object category to detect, e.g. "person", "cat"
 string keypoint_type  # keypoint set: "person" or "animal"
 ---
+std_msgs/Header header  # copied from the request image (stamp, frame_id)
 bool success
 string message
 float32 inference_time

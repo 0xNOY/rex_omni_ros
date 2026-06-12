@@ -2,6 +2,7 @@
 sensor_msgs/Image image
 BoundingBox[] reference_boxes  # pixel coordinates in the request image
 ---
+std_msgs/Header header  # copied from the request image (stamp, frame_id)
 bool success
 string message
 float32 inference_time
