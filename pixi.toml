@@ -26,6 +26,10 @@ mypy = "*"
 [feature.vllm.system-requirements]
 cuda = "12.6"
 
+[feature.vllm.dependencies]
+cuda-version = "12.6.*"
+cuda-toolkit = "12.6.*"
+
 # vLLM is installed from PyPI (not conda-forge) so that its CUDA runtime is
 # self-contained in nvidia-* wheels and cannot clash with RoboStack's native
 # library pins (libprotobuf etc.).
