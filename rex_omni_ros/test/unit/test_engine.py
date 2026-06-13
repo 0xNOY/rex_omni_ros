@@ -43,6 +43,9 @@ def checkpoint(tmp_path: Path) -> Path:
 
 
 def config_for(checkpoint: Path, **overrides: object) -> EngineConfig:
+    # Default sleep mode off so the budget equals the physical footprint;
+    # the sleep-mode budget correction is exercised by its own test.
+    overrides.setdefault("enable_sleep_mode", False)
     return EngineConfig(
         model_path=str(checkpoint),
         gpu_memory_utilization=0.0,
@@ -119,6 +122,21 @@ def test_auto_utilization_drops_cuda_graphs_when_eager(checkpoint: Path) -> None
     )
 
     assert eager < default
+
+
+def test_auto_utilization_reserves_headroom_for_sleep_mode(checkpoint: Path) -> None:
+    # Sleep mode parks the weights in a CuMem pool that vLLM's KV-cache
+    # profiler ignores, so the resident footprint runs ~weights over budget.
+    # The auto-sizer compensates by dropping the weights from the budget,
+    # lowering the utilization by exactly the weight fraction of the GPU.
+    awake = auto_gpu_memory_utilization(
+        config_for(checkpoint, enable_sleep_mode=False), TOTAL_VRAM
+    )
+    asleep = auto_gpu_memory_utilization(
+        config_for(checkpoint, enable_sleep_mode=True), TOTAL_VRAM
+    )
+
+    assert asleep == pytest.approx(awake - WEIGHT_NBYTES / TOTAL_VRAM)
 
 
 def test_auto_utilization_rejects_too_small_gpu(checkpoint: Path) -> None:

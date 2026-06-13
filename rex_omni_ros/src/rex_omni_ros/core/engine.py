@@ -167,8 +167,9 @@ def auto_gpu_memory_utilization(config: EngineConfig, total_vram_bytes: int) -> 
     one max_model_len request — sufficient because the node serializes
     requests. The rest of the GPU stays free for other processes.
     """
+    weight_bytes = _checkpoint_weight_nbytes(config.model_path)
     required = (
-        _checkpoint_weight_nbytes(config.model_path)
+        weight_bytes
         + BASE_OVERHEAD_BYTES
         + config.max_pixels * VIT_ACTIVATION_BYTES_PER_PIXEL
         + config.max_model_len * kv_cache_bytes_per_token(config.model_path)
@@ -181,10 +182,20 @@ def auto_gpu_memory_utilization(config: EngineConfig, total_vram_bytes: int) -> 
             f"GPU only has {total_vram_bytes / GIB:.2f} GiB; reduce "
             "max_model_len or max_pixels, or set enforce_eager"
         )
-    utilization = required / total_vram_bytes
+    # Sleep mode loads the weights through vLLM's CuMem allocator, into a pool
+    # its KV-cache profiler does not charge against gpu_memory_utilization. It
+    # then sizes the KV cache as if the weights were free, so the resident
+    # footprint overshoots the budget by ~weight_bytes. Drop the weights from
+    # the budget; vLLM adds them back on top, landing the footprint at
+    # `required` either way. Without this, a utilization that exactly fits in
+    # normal mode OOMs under sleep mode on a small GPU (weights double-counted).
+    budget = required - weight_bytes if config.enable_sleep_mode else required
+    utilization = budget / total_vram_bytes
     logger.info(
-        "auto gpu_memory_utilization: %.3f (%.2f GiB of %.2f GiB)",
+        "auto gpu_memory_utilization: %.3f (budget %.2f GiB, footprint "
+        "%.2f GiB of %.2f GiB)",
         utilization,
+        budget / GIB,
         required / GIB,
         total_vram_bytes / GIB,
     )
